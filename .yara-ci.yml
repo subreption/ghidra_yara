@@ -1,0 +1,6 @@
+files:
+  accept:
+  - "ghidra_yara/data/rules/**.yar"
+  - "ghidra_yara/data/rules/**.yara"
+  ignore:
+  - "ghidra_yara/data/rules/signsrch/**"
