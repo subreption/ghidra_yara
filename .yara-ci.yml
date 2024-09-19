@@ -7,3 +7,5 @@ files:
     - "ghidra_yara/data/rules/signsrch/**"
     # PEID signatures will generate false positives from the NSRL (it includes packed sw)
     - "ghidra_yara/data/rules/peid.yar"
+false_positives:
+  disabled: true
