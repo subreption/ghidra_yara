@@ -1,6 +1,9 @@
 files:
   accept:
-  - "ghidra_yara/data/rules/**.yar"
-  - "ghidra_yara/data/rules/**.yara"
+    - "ghidra_yara/data/rules/**.yar"
+    - "ghidra_yara/data/rules/**.yara"
   ignore:
-  - "ghidra_yara/data/rules/signsrch/**"
+    # until the area module is merged in upstream libyara, it will fail to compile
+    - "ghidra_yara/data/rules/signsrch/**"
+    # PEID signatures will generate false positives from the NSRL (it includes packed sw)
+    - "ghidra_yara/data/rules/peid.yar"
