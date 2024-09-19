@@ -1,0 +1,11 @@
+ghidra_yara/bin/
+ghidra_yara/dist/
+ghidra_yara/build/
+ghidra_yara/.classpath
+ghidra_yara/.project
+ghidra_yara/.pydevproject
+ghidra_yara/.gradle
+ghidra_yara/.settings
+ghidra_yara/.idea
+
+.DS_Store
