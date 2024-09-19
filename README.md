@@ -1,8 +1,8 @@
-## Ghidra_YARA
+# Ghidra_YARA
 
 ![Screenshot](images/screenshot_1.png)
 
-### Introduction
+## Introduction
 
 This is an extension providing an Analyzer for Ghidra integrating the YARA engine (via `yara-java`
 bindings) directly in the analysis process.
@@ -15,7 +15,7 @@ engine a first-class citizen in the process.
 **This extension is still in development.** It is fully functional, but should be considered
 experimental.
 
-### Highlights
+## Highlights
 
  - Can operate in monolithic or block-based scanning mode: the former loads the entirety of the program in contiguous memory (coalescing the initialized memory blocks), while the latter will iterate through each block independently.
  - High performance: typical sub-second completion times even with dozens of thousands of non-optimized rules loaded.
@@ -51,4 +51,30 @@ Examples of good targets for rules to use with Ghidra:
  - Shellcode stages.
  - Packet and network protocol headers that could be used as part of covert channels or C2 routines.
 
-TL;DR: Let the disassembler and decompiler do what they do best, and let the YARA engine do what it does best :-)
+TL;DR: Let the disassembler and decompiler do what they do best, and let the YARA engine do what it does best.
+
+
+## Reporting bugs
+
+Please file an issue, or even better, provide a **tested** and **documented** PR. :-)
+
+## Licensing
+
+```
+   Copyright (c) 2024 Subreption LLC. All rights reserved.
+   Copyright (c) 2015-2022 Paul Apostolescu. All rights reserved.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+```
+
+This library and source code are distributed under the terms described in the `LICENSE` file.
