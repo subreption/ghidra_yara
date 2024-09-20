@@ -69,7 +69,7 @@ import com.github.subreption.yara.YaraString;
 /**
  * Provide class-level documentation that describes what this analyzer does.
  */
-public class ghidra_yaraAnalyzer extends AbstractAnalyzer
+public class GhidraYaraAnalyzer extends AbstractAnalyzer
 {
 	private static final String NAME = "YARA Analyzer";
 	private static final String DESCRIPTION =
@@ -108,7 +108,7 @@ public class ghidra_yaraAnalyzer extends AbstractAnalyzer
 	
 	private BookmarkManager bookmarkManager = null;
 
-	public ghidra_yaraAnalyzer()
+	public GhidraYaraAnalyzer()
 	{
 		super(NAME, DESCRIPTION, AnalyzerType.BYTE_ANALYZER);
 	}
@@ -225,21 +225,17 @@ public class ghidra_yaraAnalyzer extends AbstractAnalyzer
         return allBytes;
     }
 	
-	private void handleMatch(Program program, AddressSetView set, TaskMonitor monitor, MessageLog log, YaraRule rule, Address baseAddress)
+	private void handleMatch(Program program, AddressSetView set, TaskMonitor monitor, MessageLog log, YaraRule rule, Address baseAddress) throws CancelledException
 	{
 		String metaDescription = "";
 		SymbolTable symTable = program.getSymbolTable();
 		Listing progListing = program.getListing();
 		
-		if (monitor.isCancelled())
-    	{
-    		Msg.info(this, "cancelled!");
-    		return;
-    	}
-		
 		// We need to extract the metadata for the match first
 		for (YaraMeta curMeta : IterableHelper.toIterable(rule.getMetadata()))
 		{
+			monitor.checkCancelled();
+			
 			if (curMeta == null)
 				continue;
 			
@@ -255,25 +251,30 @@ public class ghidra_yaraAnalyzer extends AbstractAnalyzer
 				
 	    for (YaraString yaraString : IterableHelper.toIterable(rule.getStrings()))
 	    {
+	    	monitor.checkCancelled();
+	    	
 	        for (YaraMatch curMatch : IterableHelper.toIterable(yaraString.getMatches()))
 	        {
+	        	monitor.checkCancelled();
+	        	
 	        	Address matchAddress = baseAddress.add(curMatch.getOffset());
 	            
 	            String idStr = String.format("YARA_%s_%s", rule.getIdentifier(), matchAddress.getPhysicalAddress().toString());
 	            
-	            Msg.info(this, String.format("Match: Labeling %s (identifier %s, offset %x, phys address %s, %d bytes)", 
-		                idStr, rule.getIdentifier(), curMatch.getOffset(),
-		                matchAddress.getPhysicalAddress().toString(),
-		                curMatch.getValue().length()));
-	            
 	            try {
+	            	byte[] matchBytes = curMatch.getBytes();
+	            	
 	            	symTable.createLabel(matchAddress, idStr, SourceType.ANALYSIS);
-	            	progListing.setComment(matchAddress, CodeUnit.EOL_COMMENT, rule.getIdentifier());
+	            	progListing.setComment(matchAddress, CodeUnit.EOL_COMMENT,
+	            			String.format("%s (%d bytes)", rule.getIdentifier(), matchBytes.length));
+	            	
+	            	Msg.info(this, String.format("Match: Created label %s (identifier %s, offset %x, phys address %s, %d bytes)", 
+			                idStr, rule.getIdentifier(), curMatch.getOffset(),
+			                matchAddress.getPhysicalAddress().toString(),
+			                matchBytes.length));
 					
 					if (createDatatypes)
-					{
-						byte[] matchBytes = curMatch.getBytes();
-						
+					{	
 						// Try to create an array
 						ArrayDataType dt = new ArrayDataType(new ByteDataType(),  matchBytes.length, 1);
 						try {
@@ -286,10 +287,9 @@ public class ghidra_yaraAnalyzer extends AbstractAnalyzer
 							progListing.createData(matchAddress, dt);
 						} catch (CodeUnitInsertionException e) {
 							// Avoid overwriting existent datatypes
-							Msg.warn(this, String.format("Could not apply datatype for %s at %s", idStr,
-									matchAddress.getPhysicalAddress().toString()), e);
+							Msg.warn(this, String.format("Could not apply datatype for %s at %s: %s", idStr,
+									matchAddress.getPhysicalAddress().toString(), e.getMessage()));
 						}
-						
 					}
 					
 					// Create bookmarks in the YARA category if enabled
@@ -409,8 +409,12 @@ public class ghidra_yaraAnalyzer extends AbstractAnalyzer
     	
     	byte[] allBytes = getProgramBytes(program, log);
  
-        YaraScanCallback scanCallback = v -> {       	
-        	handleMatch(program, set, monitor, log, v, minAddress);
+        YaraScanCallback scanCallback = v -> {
+        	try {
+				handleMatch(program, set, monitor, log, v, minAddress);
+			} catch (CancelledException e) {
+				throw new RuntimeException(e);
+			}
         };
         
         try (YaraCompiler compiler = yara.createCompiler())
@@ -452,6 +456,8 @@ public class ghidra_yaraAnalyzer extends AbstractAnalyzer
                 
                 for (MemoryBlock block : memory.getBlocks())
                 {
+                	monitor.checkCancelled();
+                	
                     if (block.isInitialized())
                     {
                         try {
@@ -469,7 +475,11 @@ public class ghidra_yaraAnalyzer extends AbstractAnalyzer
                             		blockSize));
                             
                             YaraScanCallback scanCallback = v -> {
-                            	handleMatch(program, set, monitor, log, v, curBlockAddress);
+                            	try {
+									handleMatch(program, set, monitor, log, v, curBlockAddress);
+								} catch (CancelledException e) {
+									throw new RuntimeException(e);
+								}
                             };
                             
                             scanner.setCallback(scanCallback);
