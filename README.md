@@ -48,7 +48,7 @@ experimental.
 
 Currently the following features are work-in-progress or planned for future inclusion:
 
- - Integrated svae/restore functionality with the ProgramDB for generated rules.
+ - Integrated save/restore functionality with the ProgramDB for generated rules.
  - Intra-program rule verification and matching.
  - Advanced rule generation using biclustering.
      - Based off the work from Edward Raff, Richard Zak, Gary Lopez Munoz, et al. ("Automatic Yara Rule Generation Using Biclustering", [https://arxiv.org/abs/2009.03779](https://arxiv.org/abs/2009.03779))
