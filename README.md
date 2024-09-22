@@ -14,7 +14,7 @@ throughout the Ghidra toolkit.
 Until now, Ghidra users interested in leveraging YARA signature detection needed to resort to
 scripting or out-of-band solutions. With this extension, the entire process can be configured per-program
 and executed within the existent analysis workflow, automatically or manually, making the YARA
-engine a first-class citizen in the process. The same can be said for rule generation and testing.
+engine a first-class citizen in the process. The same approach is applied for rule generation and testing.
 
 **This extension is still in development.** It is fully functional, but should be considered
 experimental.
