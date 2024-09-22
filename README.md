@@ -55,6 +55,8 @@ Currently the following features are work-in-progress or planned for future incl
 
 ## Curated rule sets
 
+TL;DR: **Let the disassembler and decompiler do what they do best, and let the YARA engine do what it does best.**
+
 Currently, we provide a limited set of rules, documented in the `data/rules` directory. Some of
 these have been modified to eliminate false positives and otherwise irrelevant rules that, in our
 experience, are not particularly useful in a reverse engineering context.
@@ -76,9 +78,6 @@ Examples of good targets for rules to use with Ghidra:
  - Telltale marks from known APT samples and their components, including variants of known ciphers.
  - Shellcode stages.
  - Packet and network protocol headers that could be used as part of covert channels or C2 routines.
-
-TL;DR: Let the disassembler and decompiler do what they do best, and let the YARA engine do what it does best.
-
 
 ## Reporting bugs
 
