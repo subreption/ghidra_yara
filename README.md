@@ -1,6 +1,6 @@
 # GhidraYara
 
-> **Finally YARA for Ghidra without the suck!**
+> **A direct Yara/Ghidra integration, finally YARA for Ghidra without the suck!**
 
 ![Screenshot](images/screenshot_1.png)
 ![Screenshot](images/analysis_bookmarks.png)
