@@ -17,103 +17,146 @@
 
 package ghidra_yara;
 
-import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.List;
 
-
-import javax.swing.*;
-
-import docking.ActionContext;
-import docking.ComponentProvider;
-import docking.action.DockingAction;
-import docking.action.ToolBarData;
-import ghidra.app.ExamplesPluginPackage;
+import ghidra.app.CorePluginPackage;
 import ghidra.app.plugin.PluginCategoryNames;
 import ghidra.app.plugin.ProgramPlugin;
-import ghidra.framework.plugintool.*;
+import ghidra.app.services.CodeViewerService;
+import ghidra.app.services.ConsoleService;
+import ghidra.framework.options.OptionsChangeListener;
+import ghidra.framework.options.ToolOptions;
+import ghidra.framework.plugintool.PluginInfo;
+import ghidra.framework.plugintool.PluginTool;
 import ghidra.framework.plugintool.util.PluginStatus;
+import ghidra.program.model.address.AddressRange;
+import ghidra.program.model.listing.Program;
 import ghidra.util.HelpLocation;
 import ghidra.util.Msg;
-import resources.Icons;
 
 /**
  * Provide class-level documentation that describes what this plugin does.
  */
 //@formatter:off
 @PluginInfo(
-	status = PluginStatus.STABLE,
-	packageName = ExamplesPluginPackage.NAME,
-	category = PluginCategoryNames.EXAMPLES,
-	shortDescription = "Plugin short description goes here.",
-	description = "Plugin long description goes here."
-)
-//@formatter:on
-public class ghidra_yaraPlugin extends ProgramPlugin {
+		status = PluginStatus.RELEASED,
+		packageName = CorePluginPackage.NAME,
+		category = PluginCategoryNames.ANALYSIS,
+		shortDescription = "FIXME",
+		description = "FIXME",
+		servicesRequired = {ConsoleService.class, CodeViewerService.class}
+		)
 
-	MyProvider provider;
+//@formatter:on
+public class GhidraYaraPlugin extends ProgramPlugin {
+	public final static String PLUGIN_NAME = "GhidraYaraPlugin";
+
+	private GhidraYaraComponent uiComponent;
+	private YaraRuleTableProvider yaraRuleTableProvider;
+
+	private List<GhidraYaraRule> ruleList;
+
+	private ConsoleService consoleService;
+	private CodeViewerService codeViewerService;
+
+	private static final String YARA_RULES_PROPERTY = "GhidraYaraRules";
+	private static final String OPTIONS_CATEGORY = "YARA";
+	private static final String OPTION_DEFAULT_AUTHOR = "Default YARA Rule Author";
+
+	private String defaultAuthor;
 
 	/**
 	 * Plugin constructor.
-	 * 
+	 *
 	 * @param tool The plugin tool that this plugin is added to.
 	 */
-	public ghidra_yaraPlugin(PluginTool tool) {
+	public GhidraYaraPlugin(PluginTool tool) {
 		super(tool);
 
 		// Customize provider (or remove if a provider is not desired)
 		String pluginName = getName();
-		provider = new MyProvider(this, pluginName);
+		uiComponent = new GhidraYaraComponent(this, pluginName);
 
 		// Customize help (or remove if help is not desired)
 		String topicName = this.getClass().getPackage().getName();
 		String anchorName = "HelpAnchor";
-		provider.setHelpLocation(new HelpLocation(topicName, anchorName));
+
+		uiComponent.setHelpLocation(new HelpLocation(topicName, anchorName));
+
+		// Create and register the YARA rule provider panel
+		yaraRuleTableProvider = new YaraRuleTableProvider(tool, getName());
+
+		tool.addComponentProvider(yaraRuleTableProvider, false);
+
+		ruleList = new ArrayList<>();
+
+		// Register options for the plugin
+		ToolOptions options = tool.getOptions(OPTIONS_CATEGORY);
+		options.registerOption(OPTION_DEFAULT_AUTHOR, pluginName, new HelpLocation("YARA", "DefaultAuthor"),
+				"Default author name for generated YARA rules.");
+
+		defaultAuthor = options.getString(OPTION_DEFAULT_AUTHOR, pluginName);
+
+		options.addOptionsChangeListener(new GhidraYaraPluginOptionsListener());
+
+		Msg.info(this, "Initialized Yara plugin...");
 	}
 
 	@Override
 	public void init() {
 		super.init();
 
-		// Acquire services if necessary
+		consoleService = tool.getService(ConsoleService.class);
+		codeViewerService = tool.getService(CodeViewerService.class);
 	}
 
-	// If provider is desired, it is recommended to move it to its own file
-	private static class MyProvider extends ComponentProvider {
-
-		private JPanel panel;
-		private DockingAction action;
-
-		public MyProvider(Plugin plugin, String owner) {
-			super(plugin.getTool(), owner, owner);
-			buildPanel();
-			createActions();
+	public void optionsChanged(ToolOptions options, String optionName, Object oldValue, Object newValue) {
+		if (OPTION_DEFAULT_AUTHOR.equals(optionName)) {
+			defaultAuthor = (String) newValue;
 		}
+	}
 
-		// Customize GUI
-		private void buildPanel() {
-			panel = new JPanel(new BorderLayout());
-			JTextArea textArea = new JTextArea(5, 25);
-			textArea.setEditable(false);
-			panel.add(new JScrollPane(textArea));
-			setVisible(true);
-		}
+	private GhidraYaraRule toYaraRule(byte[] bytes) {
+		GhidraYaraRule yaraRule = new GhidraYaraRule(bytes);
 
-		// Customize actions
-		private void createActions() {
-			action = new DockingAction("My Action", getName()) {
-				@Override
-				public void actionPerformed(ActionContext context) {
-					Msg.showInfo(getClass(), panel, "Custom Action", "Hello!");
-				}
-			};
-			action.setToolBarData(new ToolBarData(Icons.ADD_ICON, null));
-			action.setEnabled(true);
-			action.markHelpUnnecessary();
-			dockingTool.addLocalAction(this, action);
-		}
+		return yaraRule;
+	}
+
+	private void addGeneratedYaraRule(GhidraYaraRule yaraRule) {
+		ruleList.add(yaraRule);
+
+		yaraRuleTableProvider.updateRules(ruleList);
+
+		// Show the panel if it is hidden
+		tool.showComponentProvider(yaraRuleTableProvider, true);
+
+		return;
+	}
+
+	public void generateYaraRule(Program program, AddressRange range, byte[] bytes) {
+		String msg;
+		GhidraYaraRule yaraRule;
+
+		yaraRule = toYaraRule(bytes);
+		yaraRule.setAuthor(defaultAuthor);
+		yaraRule.setDescription(String.format("Automatically generated for %s", range.toString()));
+
+		msg = String.format("Generated Yara Rule `%s` for %d bytes from %s", yaraRule.getIdentifier(), bytes.length,
+				range.toString());
+
+		consoleService.addMessage(getName(), msg);
+		Msg.info(this, msg);
+
+		addGeneratedYaraRule(yaraRule);
+	}
+
+	private class GhidraYaraPluginOptionsListener implements OptionsChangeListener {
 
 		@Override
-		public JComponent getComponent() {
-			return panel;
+		public void optionsChanged(ToolOptions options, String name, Object oldValue, Object newValue) {
+			this.optionsChanged(options, name, oldValue, newValue);
 		}
 	}
+
 }
