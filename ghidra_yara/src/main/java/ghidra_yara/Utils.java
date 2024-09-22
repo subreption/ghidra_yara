@@ -13,16 +13,35 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * ---
+ * Created: Sep 22, 2024 (sbrptdev2)
+ *
  */
 
 package ghidra_yara;
 
-import java.util.Iterator;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
-public class IterableHelper {
+/**
+ *
+ */
+public class Utils {
+	public static String bytesToHex(byte[] bytes) {
+		StringBuilder sb = new StringBuilder();
+		for (byte b : bytes) {
+			sb.append(String.format("%02x", b));
+		}
+		return sb.toString();
+	}
 
-	// Method to convert Iterator to Iterable
-	public static <T> Iterable<T> toIterable(Iterator<T> iterator) {
-		return () -> iterator;
+	public static Date localDateTimeToDate(LocalDateTime dateTime) {
+		Date in = new Date();
+
+		LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
+
+		return Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
 	}
 }
