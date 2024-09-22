@@ -1,21 +1,29 @@
-# Ghidra_YARA
+# GhidraYara
+
+> **Finally YARA for Ghidra without the suck!**
 
 ![Screenshot](images/screenshot_1.png)
+![Screenshot](images/analysis_bookmarks.png)
 
 ## Introduction
 
 This is an extension providing an Analyzer for Ghidra integrating the YARA engine (via `yara-java`
-bindings) directly in the analysis process.
+bindings) directly in the analysis process, as well as YARA generation and management capabilities
+throughout the Ghidra toolkit.
 
 Until now, Ghidra users interested in leveraging YARA signature detection needed to resort to
 scripting or out-of-band solutions. With this extension, the entire process can be configured per-program
 and executed within the existent analysis workflow, automatically or manually, making the YARA
-engine a first-class citizen in the process.
+engine a first-class citizen in the process. The same can be said for rule generation and testing.
 
 **This extension is still in development.** It is fully functional, but should be considered
 experimental.
 
 ## Highlights
+
+### Scanning (signature matching)
+
+![Screenshot](images/analyzer.png)
 
  - Can operate in monolithic or block-based scanning mode: the former loads the entirety of the program in contiguous memory (coalescing the initialized memory blocks), while the latter will iterate through each block independently.
  - High performance: typical sub-second completion times even with dozens of thousands of non-optimized rules loaded.
@@ -26,6 +34,24 @@ experimental.
  - Fully integrated in the analysis workflow.
  - Automatic labeling and creation (avoiding conflicts) of data types matching the exact size of the detected signature.
      - For example, CRC lookup tables can be fully recovered, labeled and typed correctly.
+
+### Rule generation and testing
+
+![Screenshot](images/rule_management.png)
+
+ - Rules can be generated from code or data selections, directly through contextual actions.
+ - Management of rules can be done with real-time updates in an integrated table.
+ - Rules can be exported to the file-system.
+ - Individual selection for all operations, including verification.
+
+## Planned features and work in progress
+
+Currently the following features are work-in-progress or planned for future inclusion:
+
+ - Integrated svae/restore functionality with the ProgramDB for generated rules.
+ - Intra-program rule verification and matching.
+ - Advanced rule generation using biclustering.
+     - Based off the work from Edward Raff, Richard Zak, Gary Lopez Munoz, et al. ("Automatic Yara Rule Generation Using Biclustering", [https://arxiv.org/abs/2009.03779](https://arxiv.org/abs/2009.03779))
 
 ## Curated rule sets
 
@@ -42,7 +68,7 @@ as found in many public repositories, are practically useless, and usually creat
 also applies to rules attempting to detect compiler toolchains (as opposed to, say, packers).
 
 Examples of good targets for rules to use with Ghidra:
- 
+
  - URLs, API tokens, and other potential *secrets*.
  - S-Boxes, initialization vectors and constants, multiplication constants.
  - Error correction tables.
