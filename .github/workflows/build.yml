@@ -76,7 +76,7 @@ jobs:
         fail_on_unmatched_files: true
         prerelease: true
         tag_name: latest
-        title: "GhidraYara Nightly (${{steps.date.outputs.date}})"
+        name: "GhidraYara Nightly (${{steps.date.outputs.date}})"
         files: GhidraYara_Ghidra_*/*.zip
         token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -90,6 +90,6 @@ jobs:
         prerelease: false
         generate_release_notes: true
         fail_on_unmatched_files: true
-        title: "Ghidra GhidraYara ${{github.ref_name}}"
+        name: "Ghidra GhidraYara ${{github.ref_name}}"
         files: GhidraYara_Ghidra_*/*.zip
         token: ${{ secrets.GITHUB_TOKEN }}
