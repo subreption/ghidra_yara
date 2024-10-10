@@ -35,14 +35,19 @@ jobs:
         auth_token: ${{ secrets.GITHUB_TOKEN }}
         version: ${{ matrix.ghidra }}
 
+    - name: List files
+      run: ls -lhR
+
     - name: Build
       run: gradle buildExtension
+      working-directory: ./ghidra_yara
       env:
         GITHUB_TOKEN: ${{ secrets.READONLY_PUBLIC_REPO_PAT }}
         GITHUB_USERNAME: ${{ secrets.READONLY_PUBLIC_REPO_USER }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
+      working-directory: ./ghidra_yara
       with:
         name: GhidraYara_Ghidra_${{ matrix.ghidra }}
         path: dist/*.zip
@@ -58,6 +63,9 @@ jobs:
 
     - name: Download binaries
       uses: actions/download-artifact@v4
+
+    - name: List files
+      run: ls -lhR
 
     - name: Release nightly
       if: github.ref == 'refs/heads/main'
