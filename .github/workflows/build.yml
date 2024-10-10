@@ -1,6 +1,16 @@
 name: Build
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        required: true
+      annotation:
+        type: string
+        required: false
 
 permissions:
   contents: write
@@ -70,46 +80,25 @@ jobs:
     - name: List files
       run: ls -lhR
 
-    - name: Generate SHA256 hashes
-      id: generate_hashes
-      run: |
-        hashes=$(find . -name "*.zip" -print0 | xargs -0 -I {} sha256sum {} | awk '{print $2 ": " $1}')
-        echo "hashes=$hashes" >> $GITHUB_ENV
-
     - name: Release nightly
       if: github.ref == 'refs/heads/main'
-      uses: softprops/action-gh-release@v2
+      uses: plu5/automatic-releases-with-sha-action@main
       with:
-        draft: false
-        generate_release_notes: true
-        fail_on_unmatched_files: true
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
         prerelease: true
-        tag_name: latest
-        name: "GhidraYara Nightly (${{steps.date.outputs.date}})"
+        draft: false
+        is_tag_static: true
+        title: "GhidraYara Nightly (${{steps.date.outputs.date}})"
         files: GhidraYara_Ghidra_*/*.zip
-        token: ${{ secrets.GITHUB_TOKEN }}
-        append_body: true
-        body: |
-            This is a nightly automated build published from CI infrastructure. Exercise caution
-            before trusting CI build artifacts from any repository!
-            ### SHA256 Hashes
-            ${{ env.hashes }}
+        tag_annotation: ${{ inputs.annotation }}
 
     - name: Release stable
       if: contains(github.ref, 'refs/tags/v')
-      uses: softprops/action-gh-release@v2
+      uses: plu5/automatic-releases-with-sha-action@main
       with:
-        tag_name: stable
-        name: "GhidraYara stable (${{ github.ref }}) (${{steps.date.outputs.date}})"
-        draft: true
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
-        generate_release_notes: true
-        fail_on_unmatched_files: true
-        append_body: true
+        title: "GhidraYara ${{github.ref_name}}"
         files: GhidraYara_Ghidra_*/*.zip
-        token: ${{ secrets.GITHUB_TOKEN }}
-        body: |
-            This is a stable automated build published from CI infrastructure. Exercise caution
-            before trusting CI build artifacts from any repository!
-            ### SHA256 Hashes
-            ${{ env.hashes }}
+        tag_annotation: ${{ inputs.annotation }}
