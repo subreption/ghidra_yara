@@ -67,11 +67,11 @@ jobs:
     - name: List files
       run: ls -lhR
 
-    - name: Release stable
+    - name: Release nightly
       if: github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v2
       with:
-        draft: true
+        draft: false
         generate_release_notes: true
         fail_on_unmatched_files: true
         prerelease: true
@@ -84,12 +84,11 @@ jobs:
       if: contains(github.ref, 'refs/tags/v')
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ github.ref }}
-        name: Release ${{ github.ref }} (${{ matrix.arch }})
+        tag_name: stable
+        name: "GhidraYara stable (${{ github.ref }}) (${{steps.date.outputs.date}})"
         draft: true
         prerelease: false
         generate_release_notes: true
         fail_on_unmatched_files: true
-        name: "Ghidra GhidraYara ${{github.ref_name}}"
         files: GhidraYara_Ghidra_*/*.zip
         token: ${{ secrets.GITHUB_TOKEN }}
