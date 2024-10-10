@@ -2,6 +2,8 @@
 
 > **A direct Yara/Ghidra integration, finally YARA for Ghidra without the suck!**
 
+[![Build](https://github.com/subreption/ghidra_yara/actions/workflows/build.yml/badge.svg)](https://github.com/subreption/ghidra_yara/actions/workflows/build.yml)
+
 ![Screenshot](images/screenshot_1.png)
 ![Screenshot](images/analysis_bookmarks.png)
 
