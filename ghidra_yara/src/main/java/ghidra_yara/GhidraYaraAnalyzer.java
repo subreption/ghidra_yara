@@ -396,10 +396,10 @@ public class GhidraYaraAnalyzer extends AbstractAnalyzer
 	{
 		return (errorLevel, fileName, lineNumber, message) -> {
 			switch (errorLevel) {
-			case ErrorLevel.WARNING:
+			case WARNING:
 				Msg.warn(this, String.format("WARNING: %s (line %d): %s", fileName, lineNumber, message.toString()));
 				break;
-			case ErrorLevel.ERROR:
+			case ERROR:
 				Msg.error(this, String.format("Compiler failed for %s (line %d): %s", fileName, lineNumber, message.toString()));
 				break;
 			default:
