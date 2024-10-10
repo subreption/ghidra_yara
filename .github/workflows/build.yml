@@ -13,6 +13,8 @@ jobs:
     strategy:
       matrix:
         ghidra:
+          # Add a fallback version to the matrix so the latest (at the time CI runs) is always used first
+          - "latest"
           - "11.2"
           - "11.1.2"
           - "11.1.1"
@@ -35,6 +37,8 @@ jobs:
       with:
         auth_token: ${{ secrets.GITHUB_TOKEN }}
         version: ${{ matrix.ghidra }}
+        sha256sum: 'online'
+        owner: 'NationalSecurityAgency'
 
     - name: List files
       run: ls -lhR
