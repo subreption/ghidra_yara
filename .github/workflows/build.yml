@@ -15,7 +15,6 @@ jobs:
         ghidra:
           # Add a fallback version to the matrix so the latest (at the time CI runs) is always used first
           - "latest"
-          - "11.2"
           - "11.1.2"
           - "11.1.1"
 
@@ -71,6 +70,12 @@ jobs:
     - name: List files
       run: ls -lhR
 
+    - name: Generate SHA256 hashes
+      id: generate_hashes
+      run: |
+        hashes=$(find . -name "*.zip" -print0 | xargs -0 -I {} sha256sum {} | awk '{print $2 ": " $1}')
+        echo "hashes=$hashes" >> $GITHUB_ENV
+
     - name: Release nightly
       if: github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v2
@@ -83,6 +88,12 @@ jobs:
         name: "GhidraYara Nightly (${{steps.date.outputs.date}})"
         files: GhidraYara_Ghidra_*/*.zip
         token: ${{ secrets.GITHUB_TOKEN }}
+        append_body: true
+        body: |
+            This is a nightly automated build published from CI infrastructure. Exercise caution
+            before trusting CI build artifacts from any repository!
+            ### SHA256 Hashes
+            ${{ env.hashes }}
 
     - name: Release stable
       if: contains(github.ref, 'refs/tags/v')
@@ -94,5 +105,11 @@ jobs:
         prerelease: false
         generate_release_notes: true
         fail_on_unmatched_files: true
+        append_body: true
         files: GhidraYara_Ghidra_*/*.zip
         token: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+            This is a stable automated build published from CI infrastructure. Exercise caution
+            before trusting CI build artifacts from any repository!
+            ### SHA256 Hashes
+            ${{ env.hashes }}
