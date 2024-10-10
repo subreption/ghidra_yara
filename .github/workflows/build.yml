@@ -47,10 +47,9 @@ jobs:
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
-      working-directory: ./ghidra_yara
       with:
         name: GhidraYara_Ghidra_${{ matrix.ghidra }}
-        path: dist/*.zip
+        path: ghidra_yara/dist/*.zip
 
   release:
     runs-on: "ubuntu-latest"
