@@ -15,10 +15,10 @@
  */
 // Builds a Ghidra Extension for a given Ghidra installation.
 //
-// An absolute path to the Ghidra installation directory must be supplied either by setting the 
+// An absolute path to the Ghidra installation directory must be supplied either by setting the
 // GHIDRA_INSTALL_DIR environment variable or Gradle project property:
 //
-//     > export GHIDRA_INSTALL_DIR=<Absolute path to Ghidra> 
+//     > export GHIDRA_INSTALL_DIR=<Absolute path to Ghidra>
 //     > gradle
 //
 //         or
@@ -51,7 +51,7 @@ task distributeExtension {
 //----------------------END "DO NOT MODIFY" SECTION-------------------------------
 
 repositories {
-	// Declare dependency repositories here.  This is not needed if dependencies are manually 
+	// Declare dependency repositories here.  This is not needed if dependencies are manually
 	// dropped into the lib/ directory.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html for more info.
 	// Ex: mavenCentral()
@@ -63,7 +63,7 @@ repositories {
             	password = project.findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
         	}
         }
-    
+
     flatDir {
         dirs 'libs'
     }
@@ -74,5 +74,15 @@ dependencies {
 	implementation fileTree(dir: 'libs', include: '*.jar')
 }
 
-// Exclude additional files from the built extension
-// Ex: buildExtension.exclude '.idea/**'
+version = '0.1.0'
+ext {
+    extname = 'GhidraYara'
+}
+
+processResources {
+    filesMatching('extension.properties') {
+        expand(
+            extversion: version,
+            extname: ext.extname,        )
+    }
+}
