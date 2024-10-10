@@ -39,7 +39,7 @@ jobs:
       run: ls -lhR
 
     - name: Build
-      run: gradle buildExtension
+      run: gradle --console plain buildExtension
       working-directory: ./ghidra_yara
       env:
         GITHUB_TOKEN: ${{ secrets.READONLY_PUBLIC_REPO_PAT }}
