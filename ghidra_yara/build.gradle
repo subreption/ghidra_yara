@@ -71,6 +71,17 @@ repositories {
 
 dependencies {
 	implementation 'com.github.subreption:libyara:4.5.2-SNAPSHOT'
+
+	def osName = System.getProperty("os.name").toLowerCase()
+
+    if (osName.contains("linux")) {
+        runtimeOnly 'com.github.subreption:libyara:4.5.2-SNAPSHOT:linux64@jar'
+    } else if (osName.contains("mac")) {
+        runtimeOnly 'com.github.subreption:libyara:4.5.2-SNAPSHOT:mac@jar'
+    } else {
+        throw new GradleException("Unsupported OS: " + osName)
+    }
+
 	implementation fileTree(dir: 'libs', include: '*.jar')
 }
 
