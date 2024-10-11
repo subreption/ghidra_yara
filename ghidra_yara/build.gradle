@@ -70,20 +70,16 @@ repositories {
 }
 
 dependencies {
-	implementation 'com.github.subreption:libyara:4.5.2-SNAPSHOT'
+    def libyaraVersion = '4.5.2-stable'
 
-	def osName = System.getProperty("os.name").toLowerCase()
+    implementation "com.github.subreption:libyara:$libyaraVersion"
+    runtimeOnly "com.github.subreption:libyara:$libyaraVersion:linux64@jar"
+    runtimeOnly "com.github.subreption:libyara:$libyaraVersion:osx64@jar"
 
-    if (osName.contains("linux")) {
-        runtimeOnly 'com.github.subreption:libyara:4.5.2-SNAPSHOT:linux64@jar'
-    } else if (osName.contains("mac")) {
-        runtimeOnly 'com.github.subreption:libyara:4.5.2-SNAPSHOT:mac@jar'
-    } else {
-        throw new GradleException("Unsupported OS: " + osName)
-    }
-
-	implementation fileTree(dir: 'libs', include: '*.jar')
+    // Include additional jar files if needed
+    implementation fileTree(dir: 'libs', include: '*.jar')
 }
+
 
 version = '0.1.0'
 ext {
